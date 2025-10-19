@@ -1,3 +1,7 @@
+import freshLemonadeImg from "@/assets/fresh-lemonade.jpg";
+import mangoLassiImg from "@/assets/mango-lassi.jpg";
+import craftBeerImg from "@/assets/craft-beer.jpg";
+
 export interface Dish {
   id: string;
   name: string;
@@ -167,7 +171,7 @@ export const menuData: Dish[] = [
     description: "House-made lemonade with fresh mint",
     price: 4.99,
     category: "drink",
-    image: "https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9d?w=800&q=80",
+    image: freshLemonadeImg,
     dietary: ["vegetarian", "vegan", "gluten-free"],
     spiceLevel: null,
     style: null,
@@ -181,7 +185,7 @@ export const menuData: Dish[] = [
     description: "Traditional Indian yogurt drink blended with fresh mango",
     price: 5.99,
     category: "drink",
-    image: "https://images.unsplash.com/photo-1627308595186-d6870d3f4260?w=800&q=80",
+    image: mangoLassiImg,
     dietary: ["vegetarian", "gluten-free"],
     spiceLevel: null,
     style: null,
@@ -195,7 +199,7 @@ export const menuData: Dish[] = [
     description: "Ask your server for our rotating selection of local craft beers",
     price: 7.99,
     category: "drink",
-    image: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&q=80",
+    image: craftBeerImg,
     dietary: [],
     spiceLevel: null,
     style: null,

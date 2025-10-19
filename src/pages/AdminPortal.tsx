@@ -4,10 +4,27 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BarChart, TrendingUp, Users, DollarSign, ShoppingBag, Star, Plus, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { BarChart, TrendingUp, Users, DollarSign, ShoppingBag, Star, Plus, Pencil, Trash2, ImageIcon, GripVertical } from "lucide-react";
 import { menuData as initialMenuData, Dish } from "@/data/menuData";
 import { MenuItemForm } from "@/components/admin/MenuItemForm";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const AdminPortal = () => {
   const [menuItems, setMenuItems] = useState<Dish[]>(initialMenuData);
@@ -77,6 +94,34 @@ const AdminPortal = () => {
       title: dish?.available ? "Dish marked unavailable" : "Dish marked available",
       description: `${dish?.name} is now ${!dish?.available ? "available" : "unavailable"}.`,
     });
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent, category: string) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const categoryItems = menuItems.filter((item) => item.category === category);
+      const oldIndex = categoryItems.findIndex((item) => item.id === active.id);
+      const newIndex = categoryItems.findIndex((item) => item.id === over.id);
+
+      const reorderedCategoryItems = arrayMove(categoryItems, oldIndex, newIndex);
+      
+      // Update the full menu with the reordered items for this category
+      const otherItems = menuItems.filter((item) => item.category !== category);
+      setMenuItems([...otherItems, ...reorderedCategoryItems]);
+
+      toast({
+        title: "Menu reordered",
+        description: "Items have been reordered successfully.",
+      });
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -292,82 +337,29 @@ const AdminPortal = () => {
                     return (
                       <div key={category}>
                         <h3 className="text-lg font-semibold mb-3 capitalize">{category}s</h3>
-                        <div className="grid grid-cols-1 gap-3">
-                          {categoryItems.map((dish) => (
-                            <div
-                              key={dish.id}
-                              className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border"
-                            >
-                              {dish.image ? (
-                                <img
-                                  src={dish.image}
-                                  alt={dish.name}
-                                  className="w-20 h-20 object-cover rounded-lg"
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={(event) => handleDragEnd(event, category)}
+                        >
+                          <SortableContext
+                            items={categoryItems.map((item) => item.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="grid grid-cols-1 gap-3">
+                              {categoryItems.map((dish) => (
+                                <SortableMenuItem
+                                  key={dish.id}
+                                  dish={dish}
+                                  getCategoryColor={getCategoryColor}
+                                  onToggleAvailability={handleToggleAvailability}
+                                  onEdit={handleEditDish}
+                                  onDelete={handleDeleteDish}
                                 />
-                              ) : (
-                                <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
-                                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                                </div>
-                              )}
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-semibold">{dish.name}</h4>
-                                  <Badge className={getCategoryColor(dish.category)}>
-                                    {dish.category}
-                                  </Badge>
-                                  {!dish.available && (
-                                    <Badge variant="destructive">Unavailable</Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
-                                  {dish.description}
-                                </p>
-                                <div className="flex items-center gap-4 text-xs">
-                                  <span className="font-semibold text-primary">
-                                    ${dish.price.toFixed(2)}
-                                  </span>
-                                  {dish.dietary.length > 0 && (
-                                    <div className="flex gap-1">
-                                      {dish.dietary.map((diet) => (
-                                        <Badge key={diet} variant="outline" className="text-xs">
-                                          {diet}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  )}
-                                  {dish.spiceLevel && (
-                                    <Badge variant="secondary" className="text-xs">
-                                      {dish.spiceLevel}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleToggleAvailability(dish.id)}
-                                >
-                                  {dish.available ? "Mark Unavailable" : "Mark Available"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEditDish(dish)}
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => handleDeleteDish(dish.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SortableContext>
+                        </DndContext>
                       </div>
                     );
                   })}
@@ -393,6 +385,110 @@ const AdminPortal = () => {
           />
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+interface SortableMenuItemProps {
+  dish: Dish;
+  getCategoryColor: (category: string) => string;
+  onToggleAvailability: (dishId: string) => void;
+  onEdit: (dish: Dish) => void;
+  onDelete: (dishId: string) => void;
+}
+
+const SortableMenuItem = ({
+  dish,
+  getCategoryColor,
+  onToggleAvailability,
+  onEdit,
+  onDelete,
+}: SortableMenuItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: dish.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border"
+    >
+      <button
+        className="cursor-grab active:cursor-grabbing touch-none"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+      </button>
+      {dish.image ? (
+        <img
+          src={dish.image}
+          alt={dish.name}
+          className="w-20 h-20 object-cover rounded-lg"
+        />
+      ) : (
+        <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
+          <ImageIcon className="w-8 h-8 text-muted-foreground" />
+        </div>
+      )}
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <h4 className="font-semibold">{dish.name}</h4>
+          <Badge className={getCategoryColor(dish.category)}>
+            {dish.category}
+          </Badge>
+          {!dish.available && <Badge variant="destructive">Unavailable</Badge>}
+        </div>
+        <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+          {dish.description}
+        </p>
+        <div className="flex items-center gap-4 text-xs">
+          <span className="font-semibold text-primary">
+            ${dish.price.toFixed(2)}
+          </span>
+          {dish.dietary.length > 0 && (
+            <div className="flex gap-1">
+              {dish.dietary.map((diet) => (
+                <Badge key={diet} variant="outline" className="text-xs">
+                  {diet}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {dish.spiceLevel && (
+            <Badge variant="secondary" className="text-xs">
+              {dish.spiceLevel}
+            </Badge>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onToggleAvailability(dish.id)}
+        >
+          {dish.available ? "Mark Unavailable" : "Mark Available"}
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => onEdit(dish)}>
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() => onDelete(dish.id)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 };

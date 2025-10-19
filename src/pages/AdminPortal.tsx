@@ -1,9 +1,19 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, TrendingUp, Users, DollarSign, ShoppingBag, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BarChart, TrendingUp, Users, DollarSign, ShoppingBag, Star, Plus, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { menuData as initialMenuData, Dish } from "@/data/menuData";
+import { MenuItemForm } from "@/components/admin/MenuItemForm";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminPortal = () => {
+  const [menuItems, setMenuItems] = useState<Dish[]>(initialMenuData);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingDish, setEditingDish] = useState<Dish | undefined>();
+  const { toast } = useToast();
   const popularDishes = [
     { name: "Chicken Tikka Masala", orders: 87, revenue: 1652.13 },
     { name: "Ribeye Steak", orders: 52, revenue: 1715.48 },
@@ -17,6 +27,68 @@ const AdminPortal = () => {
     { code: "A1B", table: 3, items: 3, total: 42.97, time: "5 min ago" },
     { code: "C2D", table: 7, items: 5, total: 89.93, time: "10 min ago" },
   ];
+
+  const handleAddDish = () => {
+    setEditingDish(undefined);
+    setIsFormOpen(true);
+  };
+
+  const handleEditDish = (dish: Dish) => {
+    setEditingDish(dish);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveDish = (dish: Dish) => {
+    if (editingDish) {
+      setMenuItems(menuItems.map((item) => (item.id === dish.id ? dish : item)));
+      toast({
+        title: "Dish updated",
+        description: `${dish.name} has been updated successfully.`,
+      });
+    } else {
+      setMenuItems([...menuItems, dish]);
+      toast({
+        title: "Dish added",
+        description: `${dish.name} has been added to the menu.`,
+      });
+    }
+    setIsFormOpen(false);
+    setEditingDish(undefined);
+  };
+
+  const handleDeleteDish = (dishId: string) => {
+    const dish = menuItems.find((item) => item.id === dishId);
+    setMenuItems(menuItems.filter((item) => item.id !== dishId));
+    toast({
+      title: "Dish deleted",
+      description: `${dish?.name} has been removed from the menu.`,
+      variant: "destructive",
+    });
+  };
+
+  const handleToggleAvailability = (dishId: string) => {
+    setMenuItems(
+      menuItems.map((item) =>
+        item.id === dishId ? { ...item, available: !item.available } : item
+      )
+    );
+    const dish = menuItems.find((item) => item.id === dishId);
+    toast({
+      title: dish?.available ? "Dish marked unavailable" : "Dish marked available",
+      description: `${dish?.name} is now ${!dish?.available ? "available" : "unavailable"}.`,
+    });
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      appetizer: "bg-accent/20 text-accent",
+      main: "bg-primary/20 text-primary",
+      side: "bg-success/20 text-success",
+      drink: "bg-warning/20 text-warning",
+      dessert: "bg-secondary/20 text-secondary-foreground",
+    };
+    return colors[category as keyof typeof colors] || "bg-muted";
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background p-4">
@@ -204,21 +276,123 @@ const AdminPortal = () => {
 
           <TabsContent value="menu" className="space-y-4 mt-6">
             <Card className="shadow-lg">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Menu Management</CardTitle>
+                <Button onClick={handleAddDish} className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add New Dish
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground mb-4">
-                    Menu CRUD operations would be implemented here
-                  </p>
-                  <Badge variant="secondary">Feature Coming Soon</Badge>
+                <div className="space-y-4">
+                  {["appetizer", "main", "side", "drink", "dessert"].map((category) => {
+                    const categoryItems = menuItems.filter((item) => item.category === category);
+                    if (categoryItems.length === 0) return null;
+
+                    return (
+                      <div key={category}>
+                        <h3 className="text-lg font-semibold mb-3 capitalize">{category}s</h3>
+                        <div className="grid grid-cols-1 gap-3">
+                          {categoryItems.map((dish) => (
+                            <div
+                              key={dish.id}
+                              className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border"
+                            >
+                              {dish.image ? (
+                                <img
+                                  src={dish.image}
+                                  alt={dish.name}
+                                  className="w-20 h-20 object-cover rounded-lg"
+                                />
+                              ) : (
+                                <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
+                                  <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold">{dish.name}</h4>
+                                  <Badge className={getCategoryColor(dish.category)}>
+                                    {dish.category}
+                                  </Badge>
+                                  {!dish.available && (
+                                    <Badge variant="destructive">Unavailable</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+                                  {dish.description}
+                                </p>
+                                <div className="flex items-center gap-4 text-xs">
+                                  <span className="font-semibold text-primary">
+                                    ${dish.price.toFixed(2)}
+                                  </span>
+                                  {dish.dietary.length > 0 && (
+                                    <div className="flex gap-1">
+                                      {dish.dietary.map((diet) => (
+                                        <Badge key={diet} variant="outline" className="text-xs">
+                                          {diet}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {dish.spiceLevel && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {dish.spiceLevel}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleToggleAvailability(dish.id)}
+                                >
+                                  {dish.available ? "Mark Unavailable" : "Mark Available"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditDish(dish)}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteDish(dish.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingDish ? "Edit Dish" : "Add New Dish"}</DialogTitle>
+          </DialogHeader>
+          <MenuItemForm
+            dish={editingDish}
+            onSave={handleSaveDish}
+            onCancel={() => {
+              setIsFormOpen(false);
+              setEditingDish(undefined);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

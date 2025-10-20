@@ -8,6 +8,8 @@ import CustomerMenu from "./pages/CustomerMenu";
 import WaiterDashboard from "./pages/WaiterDashboard";
 import KitchenDisplay from "./pages/KitchenDisplay";
 import AdminPortal from "./pages/AdminPortal";
+import MarketingLanding from "./pages/MarketingLanding";
+import SetupGuide from "./pages/SetupGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/waiter" element={<WaiterDashboard />} />
           <Route path="/kitchen" element={<KitchenDisplay />} />
           <Route path="/admin" element={<AdminPortal />} />
+          <Route path="/marketing" element={<MarketingLanding />} />
+          <Route path="/setup" element={<SetupGuide />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

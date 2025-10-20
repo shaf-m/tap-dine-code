@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { menuData } from "@/data/menuData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,11 @@ const KitchenDisplay = () => {
       notes: "Extra spicy",
     },
   ]);
+
+  // Sync orders to localStorage for waiter notifications
+  useEffect(() => {
+    localStorage.setItem("kitchenOrders", JSON.stringify(orders));
+  }, [orders]);
 
   const handleStatusChange = (orderId: string, newStatus: "pending" | "preparing" | "ready") => {
     setOrders((prev) =>

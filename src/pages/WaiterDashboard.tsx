@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { menuData } from "@/data/menuData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,14 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, Send, Plus, Minus, Trash2 } from "lucide-react";
+import { Search, Send, Plus, Minus, Trash2, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const WaiterDashboard = () => {
   const [orderCode, setOrderCode] = useState("");
   const [loadedOrder, setLoadedOrder] = useState<any>(null);
   const [orderNotes, setOrderNotes] = useState("");
+  const [readyOrders, setReadyOrders] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Listen for orders marked as ready
+  useEffect(() => {
+    const checkReadyOrders = () => {
+      const ordersData = localStorage.getItem("kitchenOrders");
+      if (ordersData) {
+        const orders = JSON.parse(ordersData);
+        const ready = orders.filter((o: any) => o.status === "ready").map((o: any) => o.code);
+        
+        // Check for new ready orders
+        const newReadyOrders = ready.filter((code: string) => !readyOrders.includes(code));
+        if (newReadyOrders.length > 0) {
+          newReadyOrders.forEach((code: string) => {
+            const order = orders.find((o: any) => o.code === code);
+            toast({
+              title: "🔔 Order Ready!",
+              description: `Order ${code} for Table ${order.tableNumber} is ready to serve`,
+              duration: 10000,
+            });
+          });
+        }
+        
+        setReadyOrders(ready);
+      }
+    };
+
+    // Check immediately and then every 3 seconds
+    checkReadyOrders();
+    const interval = setInterval(checkReadyOrders, 3000);
+
+    return () => clearInterval(interval);
+  }, [readyOrders, toast]);
 
   // Simulated order lookup
   const handleLoadOrder = () => {
@@ -86,8 +119,21 @@ const WaiterDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="bg-primary/10 border-l-4 border-primary rounded-lg p-6">
-          <h1 className="text-3xl font-bold mb-2">Waiter Dashboard</h1>
-          <p className="text-muted-foreground">Enter customer order codes to review and confirm orders</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Waiter Dashboard</h1>
+              <p className="text-muted-foreground">Enter customer order codes to review and confirm orders</p>
+            </div>
+            {readyOrders.length > 0 && (
+              <div className="flex items-center gap-2 bg-success/10 border border-success rounded-lg px-4 py-2">
+                <Bell className="w-5 h-5 text-success animate-pulse" />
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-success">{readyOrders.length} Ready</p>
+                  <p className="text-xs text-muted-foreground">Orders to serve</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <Card className="shadow-lg">

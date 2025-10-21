@@ -4,6 +4,7 @@ export interface Dish {
   description: string;
   price: number;
   category: "appetizer" | "main" | "side" | "drink" | "dessert";
+  subcategory?: string; // e.g., "Kebabs", "Rice Specialties", "Traditional Stews"
   image: string;
   dietary: string[];
   spiceLevel: "mild" | "medium" | "spicy" | "extra-spicy" | null;
@@ -11,7 +12,23 @@ export interface Dish {
   ingredients: string[];
   allergens: string[];
   available: boolean;
+  featured?: boolean; // For chef specials, deal of the day, etc.
 }
+
+export interface MenuCategory {
+  id: string;
+  name: string;
+  displayName: string;
+  icon: string;
+}
+
+export const defaultCategories: MenuCategory[] = [
+  { id: "appetizer", name: "appetizer", displayName: "Appetizers & Starters", icon: "🥗" },
+  { id: "main", name: "main", displayName: "Main Courses", icon: "🍽️" },
+  { id: "side", name: "side", displayName: "Sides & Breads", icon: "🥔" },
+  { id: "drink", name: "drink", displayName: "Beverages", icon: "🍹" },
+  { id: "dessert", name: "dessert", displayName: "Desserts", icon: "🍰" },
+];
 
 export const menuData: Dish[] = [
   // Appetizers & Starters
@@ -76,6 +93,7 @@ export const menuData: Dish[] = [
   {
     id: "main-1",
     name: "Chopan Kebab",
+    subcategory: "Kebabs",
     description: "Tender lamb cubes marinated in onion juice, dried fig, and garlic for 24 hours, charcoal-grilled to perfection. Served with rice and naan",
     price: 24.99,
     category: "main",
@@ -90,6 +108,7 @@ export const menuData: Dish[] = [
   {
     id: "main-2",
     name: "Chapli Kebab",
+    subcategory: "Kebabs",
     description: "Spicy ground meat patties made with minced beef, seasoned with traditional Afghan spices. Served with rice and naan",
     price: 18.99,
     category: "main",
@@ -104,6 +123,7 @@ export const menuData: Dish[] = [
   {
     id: "main-3",
     name: "Chicken Kofta Kebab",
+    subcategory: "Kebabs",
     description: "Seasoned ground chicken formed into kebabs and charcoal-grilled. Served with rice and naan",
     price: 17.99,
     category: "main",
@@ -118,6 +138,7 @@ export const menuData: Dish[] = [
   {
     id: "main-4",
     name: "Kobeda",
+    subcategory: "Kebabs",
     description: "Two skewers of marinated lamb mince, charcoal-grilled. Served with rice and naan",
     price: 19.99,
     category: "main",
@@ -132,6 +153,7 @@ export const menuData: Dish[] = [
   {
     id: "main-5",
     name: "Tandoori Chicken Kebab",
+    subcategory: "Kebabs",
     description: "Chicken marinated in spiced yogurt and roasted in traditional tandoor. Served with rice and naan",
     price: 18.99,
     category: "main",
@@ -146,6 +168,7 @@ export const menuData: Dish[] = [
   {
     id: "main-6",
     name: "Lamb Chops",
+    subcategory: "Kebabs",
     description: "Five juicy lamb chops served on a bed of fried onions. Served with rice and naan",
     price: 28.99,
     category: "main",
@@ -160,6 +183,7 @@ export const menuData: Dish[] = [
   {
     id: "main-7",
     name: "Mixed Grill",
+    subcategory: "Kebabs",
     description: "Chopan kebab, charcoal chicken kebab, kobeda kebab, and lamb chop for the ultimate experience. Served with rice and naan",
     price: 36.99,
     category: "main",
@@ -176,6 +200,7 @@ export const menuData: Dish[] = [
   {
     id: "main-8",
     name: "Kabuli Pulao",
+    subcategory: "Rice Specialties",
     description: "Afghanistan's national dish featuring fragrant basmati rice with tender lamb, caramelized carrots, and raisins, garnished with slivered almonds",
     price: 22.99,
     category: "main",
@@ -190,6 +215,7 @@ export const menuData: Dish[] = [
   {
     id: "main-9",
     name: "Qabli Lamb Shank",
+    subcategory: "Rice Specialties",
     description: "Slow-cooked lamb shank served on signature Qabuli rice with chana masala",
     price: 26.99,
     category: "main",
@@ -206,6 +232,7 @@ export const menuData: Dish[] = [
   {
     id: "main-10",
     name: "Chicken Qorma",
+    subcategory: "Traditional Stews",
     description: "Tender chicken in rich tomato curry sauce. Served with rice and naan",
     price: 17.99,
     category: "main",
@@ -220,6 +247,7 @@ export const menuData: Dish[] = [
   {
     id: "main-11",
     name: "Lamb Dopiaza",
+    subcategory: "Traditional Stews",
     description: "Two onions - bone-in lamb slow-cooked with onions, garlic, and aromatic spices. Served with rice and naan",
     price: 21.99,
     category: "main",
@@ -234,6 +262,7 @@ export const menuData: Dish[] = [
   {
     id: "main-12",
     name: "Qormah e Sabzi",
+    subcategory: "Traditional Stews",
     description: "Lamb with sautéed spinach, cilantro, and fenugreek. Served with rice and naan",
     price: 20.99,
     category: "main",
@@ -248,6 +277,7 @@ export const menuData: Dish[] = [
   {
     id: "main-13",
     name: "Herati Kofta",
+    subcategory: "Traditional Stews",
     description: "Seasoned lamb meatballs cooked in rich tomato sauce. Served with rice and naan",
     price: 19.99,
     category: "main",
@@ -264,6 +294,7 @@ export const menuData: Dish[] = [
   {
     id: "main-14",
     name: "Borani Banjan",
+    subcategory: "Vegetarian",
     description: "Layers of eggplant and tomato in garlic sauce, served with yogurt. Served with rice and naan",
     price: 14.99,
     category: "main",
@@ -278,6 +309,7 @@ export const menuData: Dish[] = [
   {
     id: "main-15",
     name: "Sabzi Palak",
+    subcategory: "Vegetarian",
     description: "Fresh spinach and seasonal greens sautéed with traditional spices. Served with rice and naan",
     price: 13.99,
     category: "main",
@@ -292,6 +324,7 @@ export const menuData: Dish[] = [
   {
     id: "main-16",
     name: "Bamya",
+    subcategory: "Vegetarian",
     description: "Spicy tomato-based stew with okra, topped with fresh parsley. Served with rice and naan",
     price: 14.99,
     category: "main",
@@ -306,6 +339,7 @@ export const menuData: Dish[] = [
   {
     id: "main-17",
     name: "Channa",
+    subcategory: "Vegetarian",
     description: "Chickpea curry cooked with aromatic spices. Served with rice and naan",
     price: 12.99,
     category: "main",
@@ -320,6 +354,7 @@ export const menuData: Dish[] = [
   {
     id: "main-18",
     name: "Qormah e Lubyaa",
+    subcategory: "Vegetarian",
     description: "Red kidney beans in savory tomato sauce. Served with rice and naan",
     price: 13.99,
     category: "main",
@@ -451,14 +486,23 @@ export const menuData: Dish[] = [
   },
 ];
 
+export interface OrderItem {
+  dish: Dish;
+  quantity: number;
+  notes?: string;
+  status: "pending" | "preparing" | "ready" | "served";
+  addedAt: Date;
+}
+
 export interface Order {
   id: string;
   code: string;
   tableNumber: number;
-  items: { dish: Dish; quantity: number; notes?: string }[];
+  items: OrderItem[];
   status: "pending" | "confirmed" | "preparing" | "ready" | "served";
   timestamp: Date;
   customerName?: string;
+  totalAmount: number;
 }
 
 export const generateOrderCode = (): string => {

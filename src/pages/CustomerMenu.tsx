@@ -2,6 +2,7 @@ import { useState } from "react";
 import { menuData, Dish, generateOrderCode } from "@/data/menuData";
 import { MenuStage } from "@/components/customer/MenuStage";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ const CustomerMenu = () => {
   const [orderItems, setOrderItems] = useState<{ [key: string]: number }>({});
   const [showOrderSummary, setShowOrderSummary] = useState(false);
   const [orderCode, setOrderCode] = useState<string | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [showNameInput, setShowNameInput] = useState(false);
   const { toast } = useToast();
 
   const currentCategory = stages[currentStage].id as Dish["category"];
@@ -64,7 +67,7 @@ const CustomerMenu = () => {
     if (currentStage < stages.length - 1) {
       setCurrentStage(currentStage + 1);
     } else {
-      setShowOrderSummary(true);
+      setShowNameInput(true);
     }
   };
 
@@ -78,7 +81,7 @@ const CustomerMenu = () => {
     const code = generateOrderCode();
     setOrderCode(code);
     toast({
-      title: "Order Placed!",
+      title: `Order Placed, ${customerName || "Guest"}!`,
       description: `Your order code is ${code}. Please show this to your waiter.`,
       duration: 10000,
     });
@@ -115,6 +118,35 @@ const CustomerMenu = () => {
             >
               Start New Order
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (showNameInput) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl">Before you order...</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">May we have your name to personalize your experience?</p>
+            <Input
+              placeholder="Enter your name (optional)"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="text-lg"
+            />
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowNameInput(false)} className="flex-1">
+                Back
+              </Button>
+              <Button onClick={() => { setShowNameInput(false); setShowOrderSummary(true); }} className="flex-1">
+                Continue
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

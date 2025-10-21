@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BarChart, TrendingUp, Users, DollarSign, ShoppingBag, Star, Plus, Pencil, Trash2, ImageIcon, GripVertical } from "lucide-react";
-import { menuData as initialMenuData, Dish } from "@/data/menuData";
+import { menuData as initialMenuData, Dish, MenuCategory, defaultCategories } from "@/data/menuData";
 import { MenuItemForm } from "@/components/admin/MenuItemForm";
+import { CategoryManager } from "@/components/admin/CategoryManager";
 import { useToast } from "@/hooks/use-toast";
 import {
   DndContext,
@@ -28,6 +29,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 const AdminPortal = () => {
   const [menuItems, setMenuItems] = useState<Dish[]>(initialMenuData);
+  const [categories, setCategories] = useState<MenuCategory[]>(defaultCategories);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | undefined>();
   const { toast } = useToast();
@@ -93,6 +95,29 @@ const AdminPortal = () => {
     toast({
       title: dish?.available ? "Dish marked unavailable" : "Dish marked available",
       description: `${dish?.name} is now ${!dish?.available ? "available" : "unavailable"}.`,
+    });
+  };
+
+  const handleToggleFeatured = (dishId: string) => {
+    setMenuItems(
+      menuItems.map((item) =>
+        item.id === dishId ? { ...item, featured: !item.featured } : item
+      )
+    );
+    const dish = menuItems.find((item) => item.id === dishId);
+    toast({
+      title: dish?.featured ? "Removed from featured" : "Marked as featured",
+      description: `${dish?.name} ${!dish?.featured ? "is now a chef's special!" : "removed from specials"}`,
+    });
+  };
+
+  const handleUpdateCategory = (id: string, displayName: string, icon: string) => {
+    setCategories(categories.map(cat => 
+      cat.id === id ? { ...cat, displayName, icon } : cat
+    ));
+    toast({
+      title: "Category updated",
+      description: "Menu category has been updated successfully.",
     });
   };
 
@@ -212,10 +237,11 @@ const AdminPortal = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="orders">Recent Orders</TabsTrigger>
             <TabsTrigger value="menu">Menu Management</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics" className="space-y-4 mt-6">
@@ -348,11 +374,12 @@ const AdminPortal = () => {
                           >
                             <div className="grid grid-cols-1 gap-3">
                               {categoryItems.map((dish) => (
-                                <SortableMenuItem
+                                 <SortableMenuItem
                                   key={dish.id}
                                   dish={dish}
                                   getCategoryColor={getCategoryColor}
                                   onToggleAvailability={handleToggleAvailability}
+                                  onToggleFeatured={handleToggleFeatured}
                                   onEdit={handleEditDish}
                                   onDelete={handleDeleteDish}
                                 />
@@ -366,6 +393,10 @@ const AdminPortal = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="categories" className="space-y-4 mt-6">
+            <CategoryManager categories={categories} onUpdateCategory={handleUpdateCategory} />
           </TabsContent>
         </Tabs>
       </div>
@@ -393,6 +424,7 @@ interface SortableMenuItemProps {
   dish: Dish;
   getCategoryColor: (category: string) => string;
   onToggleAvailability: (dishId: string) => void;
+  onToggleFeatured: (dishId: string) => void;
   onEdit: (dish: Dish) => void;
   onDelete: (dishId: string) => void;
 }
@@ -401,6 +433,7 @@ const SortableMenuItem = ({
   dish,
   getCategoryColor,
   onToggleAvailability,
+  onToggleFeatured,
   onEdit,
   onDelete,
 }: SortableMenuItemProps) => {
@@ -446,8 +479,9 @@ const SortableMenuItem = ({
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
           <h4 className="font-semibold">{dish.name}</h4>
+          {dish.featured && <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />}
           <Badge className={getCategoryColor(dish.category)}>
-            {dish.category}
+            {dish.subcategory || dish.category}
           </Badge>
           {!dish.available && <Badge variant="destructive">Unavailable</Badge>}
         </div>
@@ -477,10 +511,17 @@ const SortableMenuItem = ({
       <div className="flex gap-2">
         <Button
           size="sm"
+          variant={dish.featured ? "default" : "outline"}
+          onClick={() => onToggleFeatured(dish.id)}
+        >
+          <Star className="w-4 h-4" />
+        </Button>
+        <Button
+          size="sm"
           variant="outline"
           onClick={() => onToggleAvailability(dish.id)}
         >
-          {dish.available ? "Mark Unavailable" : "Mark Available"}
+          {dish.available ? "Unavailable" : "Available"}
         </Button>
         <Button size="sm" variant="outline" onClick={() => onEdit(dish)}>
           <Pencil className="w-4 h-4" />

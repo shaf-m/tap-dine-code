@@ -15,5 +15,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // base: '/tap-dine-code/',
+  base: '/tap-dine-code/',
 }));

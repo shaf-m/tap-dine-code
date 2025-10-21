@@ -36,8 +36,8 @@ export function Header() {
               <Utensils className="w-6 h-6 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold">NFC Ordering</h1>
-              <p className="text-xs text-muted-foreground">Restaurant System</p>
+              <h1 className="text-xl font-bold">TapToDine</h1>
+              {/* <p className="text-xs text-muted-foreground">Restaurant System</p> */}
             </div>
           </Link>
 

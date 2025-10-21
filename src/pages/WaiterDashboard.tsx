@@ -202,10 +202,44 @@ const WaiterDashboard = () => {
       }
     }
 
+    // Generate mock receipt if no real order found
+    const mockReceipt = {
+      code: orderCode.toUpperCase(),
+      tableNumber: Math.floor(Math.random() * 20) + 1,
+      customerName: "Guest Customer",
+      timestamp: new Date().toISOString(),
+      items: [
+        {
+          dish: {
+            id: 1,
+            name: "Chopan Kebab",
+            price: 18.99,
+            image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143",
+          },
+          quantity: 2,
+          status: "served",
+        },
+        {
+          dish: {
+            id: 2,
+            name: "Kabuli Pulao",
+            price: 16.99,
+            image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8",
+          },
+          quantity: 1,
+          status: "served",
+        },
+      ],
+      notes: "Sample receipt - No real order found",
+      totalAmount: 54.97,
+    };
+
+    setReceiptOrder(mockReceipt);
+    setShowReceipt(true);
+    
     toast({
-      title: "Order Not Found",
-      description: `No order found with code ${orderCode}`,
-      variant: "destructive",
+      title: "Mock Receipt Generated",
+      description: "Displaying sample receipt data",
     });
   };
 

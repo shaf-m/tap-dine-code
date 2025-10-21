@@ -109,7 +109,7 @@ const MarketingLanding = () => {
               <Sparkles className="w-4 h-4 mr-2 inline" />
               Next-Generation Restaurant Technology
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary via-orange-500 to-red-500 bg-clip-text text-transparent">
               Transform Your Restaurant with NFC Table Ordering
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
@@ -239,7 +239,7 @@ const MarketingLanding = () => {
       </section>
 
       {/* Customization Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10">
+      <section className="py-20 bg-gradient-to-br from-primary/10 via-orange-500/10 to-red-500/10">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
@@ -296,7 +296,7 @@ const MarketingLanding = () => {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-purple-600 to-pink-600 border-0 text-white">
+          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-orange-600 to-red-600 border-0 text-white">
             <CardContent className="p-12 text-center space-y-6">
               <h2 className="text-4xl md:text-5xl font-bold">Ready to Transform Your Restaurant?</h2>
               <p className="text-xl text-white/90 max-w-2xl mx-auto">

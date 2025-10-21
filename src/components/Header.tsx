@@ -32,7 +32,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 hover-scale">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary via-orange-500 to-red-500 flex items-center justify-center">
               <Utensils className="w-6 h-6 text-white" />
             </div>
             <div className="hidden sm:block">
